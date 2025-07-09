@@ -1,0 +1,65 @@
+Crie um propmt para cada instrução de execução do código:
+Baixei o https://chocolatey.org para conseguir rodar o influxdb no Windows.
+Instalei o influxdb com o comando:
+choco install influxdb
+
+Instalei o k6 com o comando:
+choco install k6
+
+Front End:
+cd frontend-next
+npm i
+npm run dev
+
+Back End:
+cd backend-flask
+pip install -r requirements.txt
+flask run
+
+Execução dos testes (playwright):
+cd frontend-next
+npx playwright test tests/playwright/restaurant.spec.ts
+
+Execução dos testes (Grafana):
+k6 run --out influxdb=http://localhost:8086/k6 tests/k6/script.js
+
+Execução do Banco de Dados:
+cd ("Caminho base")\influxdb-1.8.10_windows_amd64\influxdb-1.8.10-1
+.\influx.exe
+CREATE DATABASE k6
+
+Execução do influxdb:
+cd ("Caminho base")\influxdb-1.8.10_windows_amd64\influxdb-1.8.10-1
+.\influxd.exe
+DROP DATABASE k6
+
+E o código dos gráficos do Grafana:
+
+Throughput (req/s)
+SELECT derivative(count("value"), 1s) AS "req/s"
+  FROM "http_status"
+ WHERE $timeFilter
+GROUP BY time($__interval) fill(null)
+
+Total de Requisições
+SELECT count("value") 
+  FROM "http_status" 
+ WHERE $timeFilter
+
+Latência por Método
+ SELECT mean("value") 
+  FROM "http_latency" 
+ WHERE $timeFilter
+GROUP BY time($__interval), "method" fill(null)
+
+Distribuição de Códigos HTTP
+SELECT count("value") 
+  FROM "http_status" 
+ WHERE $timeFilter
+GROUP BY "status"
+
+Portas:
+InfluxDB: 8086
+Grafana: 3000
+Frontend: 3001
+Backend: 5000
